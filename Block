@@ -1,0 +1,60 @@
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+
+// Implementing a Block
+public class Block {
+    private String hash;
+    private String previousHash;
+    private String data;
+    private long timeStamp; // The timestamp of the creation of this block
+    private int nonce; // An arbitrary number used in cryptography.
+
+    public Block(String data, String previousHash, long timeStamp)  {
+        this.data = data;
+        this.previousHash = previousHash;
+        this.timeStamp = timeStamp;
+        this.hash = calculateBlockHash();
+    }
+
+    // Calculating the Hash
+    public String calculateBlockHash() {
+        // Concatenate different parts of the block to generate a hash form
+        String dataToHash = previousHash + Long.toString(timeStamp)
+                + Integer.toString(nonce) + data;
+        MessageDigest digest = null;
+        byte[] bytes = null;
+
+        try {
+            // Get an instance of the SHA-256 hash function from MessageDigest
+            digest = MessageDigest.getInstance("SHA-256");
+            // Generate the hash value of our input data, which is a byte array
+            bytes = digest.digest(dataToHash.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+            logger.log(Level.SEVERE, ex.getMessage());
+        }
+
+        // Transform the byte array into a hex string, a hash is typically represented as a 32
+        // digit hex number
+        StringBuffer buffer = new StringBuffer();
+        for (byte b : bytes) {
+            buffer.append(String.format("%02x",b));
+        }
+        return buffer.toString();
+    }
+
+    // Mining a Block
+    public String mineBlock(int prefix) {
+        // Define the prefix we desire to find
+        String prefixString = new String(new char[prefix]).replace('\0', '0');
+        // Check if we've find the solution
+        while (!hash.substring(0,prefix).equals(prefixString)) {
+            // If not, increment the nonce and calculate the hash in a loop
+            nonce++;
+            hash = calculateBlockHash();
+        }
+        return hash;
+    }
+}
