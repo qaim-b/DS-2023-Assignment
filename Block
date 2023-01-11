@@ -1,8 +1,9 @@
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // Implementing a Block
 public class Block {
@@ -12,10 +13,10 @@ public class Block {
     private long timeStamp; // The timestamp of the creation of this block
     private int nonce; // An arbitrary number used in cryptography.
 
-    public Block(String data, String previousHash, long timeStamp)  {
+    public Block(String data, String previousHash)  {
         this.data = data;
         this.previousHash = previousHash;
-        this.timeStamp = timeStamp;
+        this.timeStamp = new Date().getTime();
         this.hash = calculateBlockHash();
     }
 
@@ -32,7 +33,8 @@ public class Block {
             digest = MessageDigest.getInstance("SHA-256");
             // Generate the hash value of our input data, which is a byte array
             bytes = digest.digest(dataToHash.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+        } catch (NoSuchAlgorithmException ex) {
+            Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
             logger.log(Level.SEVERE, ex.getMessage());
         }
 
@@ -56,5 +58,41 @@ public class Block {
             hash = calculateBlockHash();
         }
         return hash;
+    }
+
+    public static Boolean isChainValid() {
+        LinkedList<Block> blockchain = new LinkedList<>();
+        Block currentBlock;
+        Block previousBlock;
+
+        for (int i= 1; i < blockchain.getSize(); i++) {
+            // Storing the current block and the previous block
+            currentBlock = blockchain.get(i);
+            previousBlock = blockchain.get(i - 1);
+
+            // Checking if the current hash is equal to the calculated hash or not
+            if (!currentBlock.hash.equals(currentBlock.calculateBlockHash())) {
+                System.out.println("Hashes are not equal");
+                return false;
+            }
+
+            // Checking of the previous hash is equal to the calculated previous hash or not
+            if (!previousBlock.hash.equals(currentBlock.previousHash)) {
+                System.out.println("Previous Hashes are not equal");
+                return false;
+            }
+        }
+        // If all hashes are equal to the calculated hashes, then the blockchain is valid
+        return true;
+    }
+
+
+    public static void main(String[] args) {
+        LinkedList<Block> blockchain = new LinkedList<>();
+        // Adding the data to the Linked List
+        blockchain.insertAtHead(new Block("First block", "0"));
+        blockchain.insertAtHead(new Block("Second block",blockchain.get(blockchain.getSize() - 1).hash));
+        blockchain.insertAtHead(new Block("Third block", blockchain.get(blockchain.getSize() - 1).hash));
+        blockchain.insertAtHead(new Block("Fourth block",blockchain.get(blockchain.getSize() - 1).hash));
     }
 }
