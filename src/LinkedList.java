@@ -1,0 +1,58 @@
+import java.io.Serializable;
+
+public class LinkedList<T> implements Serializable{
+    private Node head;
+    private int size;
+
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public void insertAtHead(T data) {
+        Node newNode = new Node(data);
+        newNode.setNextNode(this.head);
+        this.head = newNode;
+        size++;
+    }
+
+
+    public void deleteFromHead() {
+        this.head = this.head.getNextNode();
+        size--;
+    }
+
+    public Node find(T data){
+        Node<T> current = this.head;
+        while (current != null) {
+            if (current.getData() == data) {
+                return current;
+            }
+            current = current.getNextNode();
+        }
+        return null;
+    }
+
+    public T get(int index) {
+        Node<T> current = head;
+        if (index >= size || index < 0)
+            throw new IndexOutOfBoundsException();
+
+        else if (index <= size && index >= 0) {
+            for (int i = 0; i < index; i++)
+                current = current.getNextNode();
+        }
+        return current.getData();
+    }
+
+    public String toString() {
+        String result = "{";
+        Node current = this.head;
+        while (current != null) {
+            result += current.toString() + ",";
+            current = current.getNextNode();
+        }
+        result += "}";
+        return result;
+    }
+}
