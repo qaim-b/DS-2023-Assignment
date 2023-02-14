@@ -1,0 +1,114 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package digitalwalletapp;
+
+/**
+ *
+ * @author frizzyy
+ */
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+
+public class DigitalWalletApp {
+
+    // instance variables for private and public keys, and account balance
+    private String privateKey;
+    private String publicKey;
+    private double balance;
+
+    // constructor
+    public DigitalWalletApp(String privateKey, String publicKey) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+        this.balance = 0;
+    }
+
+    // method for sending money
+    public void sendMoney(String recipientPublicKey, double amount) {
+        // check if sender has sufficient funds
+        if (this.balance < amount) {
+            System.out.println("Error: Insufficient funds.");
+            return;
+        }
+
+        // create new transaction on blockchain
+        HashMap<String, Double> transaction = new HashMap<>();
+        transaction.put(this.publicKey, -amount);
+        transaction.put(recipientPublicKey, amount);
+
+        // update account balances
+        updateBalance(transaction);
+    }
+
+    // method for receiving money
+    public void receiveMoney(String senderPublicKey, double amount) {
+        // create new transaction on blockchain
+        HashMap<String, Double> transaction = new HashMap<>();
+        transaction.put(senderPublicKey, -amount);
+        transaction.put(this.publicKey, amount);
+
+        // update account balances
+        updateBalance(transaction);
+    }
+
+    // method for updating account balance
+    private void updateBalance(HashMap<String, Double> transaction) {
+        // traverse the blockchain ledger
+        // compute the unspent input to find the current balance
+        // update the balance variable
+        // this is a placeholder, you will need to replace this with actual logic for traversing and computing the balance using the blockchain data
+        this.balance += transaction.get(this.publicKey);
+}
+    
+// method for getting account balance
+    public double getBalance() {
+        return this.balance;
+}
+
+// methods for saving and loading data
+    public void saveData(String fileName) {
+        try {
+        // create output stream for writing to file
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileName));
+
+        // write instance variables to file
+        out.writeObject(this.privateKey);
+        out.writeObject(this.publicKey);
+        out.writeDouble(this.balance);
+
+        // close output stream
+        out.close();
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+    public static Wallet loadData(String fileName) {
+        try {
+        // create input stream for reading from file
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName));
+
+        // read instance variables from file
+            String privateKey = (String) in.readObject();
+            String publicKey = (String) in.readObject();
+            double balance = in.readDouble();
+        
+        // close input stream
+            in.close();
+
+        // return new Wallet object with loaded data
+            return new Wallet(privateKey, publicKey, balance);
+
+        }   catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+    }
+}
+
+        
